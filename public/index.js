@@ -165,6 +165,44 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
+//Exercice 1 create function to generate the price for each driver:
+
+function getCar(carId){
+  var carsLength = cars.length;
+  for(var i = 0; i < carsLength; i++){
+    if(cars[i]['id'] == carId){
+      return cars[i];
+    }
+  }
+}
+
+function getRental(rentalId){
+  var rentalsLength = rentals.length;
+  for(var i = 0; i < rentalsLength; i++){
+    if(rentals[i]['id'] == rentalId){
+      return rentals[i];
+    }
+  }
+}
+
+function setPrice(carId, rentalId){
+  var car = getCar(carId);
+  var rental = getRental(rentalId);
+  var pricePerDay = car.pricePerDay;
+  var pricePerKm = car.pricePerKm;
+  var pickupDate = new Date(rental.pickupDate);
+  var returnDate = new Date(rental.returnDate);
+  var nbDays = 1 + ((returnDate - pickupDate)/(1000*3600*24));
+  var priceForDistance = (rental.distance)*pricePerKm;
+  var priceForDuration = pricePerDay*nbDays;
+  var price = priceForDistance + priceForDuration;
+  rental.price = price;
+}
+
+setPrice('p306', '1-pb-92');
+setPrice('rr-sport', '2-rs-92');
+setPrice('p-boxster', '3-sa-92');
+
 console.log(cars);
 console.log(rentals);
 console.log(actors);
