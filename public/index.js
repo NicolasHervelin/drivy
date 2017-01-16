@@ -186,28 +186,34 @@ function getRental(rentalId){
 }
 
 function setPrice(rentalId){
-  var rental = getRental(rentalId);
-  var car = getCar(rental.carId);
+  var rental = getRental(rentalId); //Get the object "rental" which match with the rental id
+  var car = getCar(rental.carId); //Get the object "car" which match with the car id
   var pricePerDay = car.pricePerDay;
   var pricePerKm = car.pricePerKm;
   var pickupDate = new Date(rental.pickupDate);
   var returnDate = new Date(rental.returnDate);
-  var nbDays = 1 + ((returnDate - pickupDate)/(1000*3600*24));
+  var nbDays = 1 + ((returnDate - pickupDate)/(1000*3600*24)); //Duration of the rental (in days)
   var priceForDistance = (rental.distance)*pricePerKm;
   var priceForDuration = 0;
   var dayCount = 1;
+  var deductibleToPay = 0; //Nothing to pay for the driver who not subscribed
+  if(rental.deductibleReduction == true)
+    deductibleToPay = 4; //4€ per day to pay for the driver who subscribed
+
   while(dayCount <= nbDays){
     if(dayCount == 1)
-      priceForDuration += pricePerDay;
+      priceForDuration += pricePerDay + deductibleToPay; //No reduction for one day rental
     else if(dayCount <= 4)
-      priceForDuration += pricePerDay - (pricePerDay*10/100);
+      priceForDuration += pricePerDay - (pricePerDay*10/100) + deductibleToPay; //10% reduction on price per day after one day rental
     else if(dayCount <= 10)
-      priceForDuration += pricePerDay - (pricePerDay*30/100);
+      priceForDuration += pricePerDay - (pricePerDay*30/100) + deductibleToPay; //30% reduction on price per day after the fourth day of rental
     else
-      priceForDuration += pricePerDay - (pricePerDay*50/100);
+      priceForDuration += pricePerDay - (pricePerDay*50/100) + deductibleToPay; //50% reduction on price per day after the tenth day of rental
     dayCount++;
   }
   rental.price = priceForDuration + priceForDistance;
+
+  //commission distribution:
   var commission = rental.price*30/100;
   rental.commission['insurance'] = commission/2;
   rental.commission['assistance'] = nbDays;
