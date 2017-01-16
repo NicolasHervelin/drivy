@@ -208,6 +208,10 @@ function setPrice(rentalId){
     dayCount++;
   }
   rental.price = priceForDuration + priceForDistance;
+  var commission = rental.price*30/100;
+  rental.commission['insurance'] = commission/2;
+  rental.commission['assistance'] = nbDays;
+  rental.commission['drivy'] = commission - (commission/2 + nbDays);
 }
 
 setPrice('1-pb-92');
