@@ -165,7 +165,6 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
-//Exercice 1 create function to generate the price for each driver:
 
 function getCar(carId){
   var carsLength = cars.length;
@@ -185,6 +184,15 @@ function getRental(rentalId){
   }
 }
 
+function getActors(rentalId){
+  var actorsLength = actors.length;
+  for(var i = 0; i < actorsLength; i++){
+    if(actors[i]['rentalId'] == rentalId){
+      return actors[i];
+    }
+  }
+}
+
 function setPrice(rentalId){
   var rental = getRental(rentalId); //Get the object "rental" which match with the rental id
   var car = getCar(rental.carId); //Get the object "car" which match with the car id
@@ -198,26 +206,47 @@ function setPrice(rentalId){
   var dayCount = 1;
   var deductibleToPay = 0; //Nothing to pay for the driver who not subscribed
   if(rental.deductibleReduction == true)
-    deductibleToPay = 4; //4€ per day to pay for the driver who subscribed
+    deductibleToPay = 4*nbDays; //4€ per day to pay for the driver who subscribed
 
   while(dayCount <= nbDays){
     if(dayCount == 1)
-      priceForDuration += pricePerDay + deductibleToPay; //No reduction for one day rental
+      priceForDuration += pricePerDay; //No reduction for one day rental
     else if(dayCount <= 4)
-      priceForDuration += pricePerDay - (pricePerDay*10/100) + deductibleToPay; //10% reduction on price per day after one day rental
+      priceForDuration += pricePerDay - (pricePerDay*10/100); //10% reduction on price per day after one day rental
     else if(dayCount <= 10)
-      priceForDuration += pricePerDay - (pricePerDay*30/100) + deductibleToPay; //30% reduction on price per day after the fourth day of rental
+      priceForDuration += pricePerDay - (pricePerDay*30/100); //30% reduction on price per day after the fourth day of rental
     else
-      priceForDuration += pricePerDay - (pricePerDay*50/100) + deductibleToPay; //50% reduction on price per day after the tenth day of rental
+      priceForDuration += pricePerDay - (pricePerDay*50/100); //50% reduction on price per day after the tenth day of rental
     dayCount++;
   }
-  rental.price = priceForDuration + priceForDistance;
 
+  rental.price = priceForDistance + priceForDuration + deductibleToPay;
   //commission distribution:
-  var commission = rental.price*30/100;
+  var priceWithoutDeductible = priceForDuration + priceForDistance;
+  var commission = priceWithoutDeductible*30/100;
   rental.commission['insurance'] = commission/2;
   rental.commission['assistance'] = nbDays;
-  rental.commission['drivy'] = commission - (commission/2 + nbDays);
+  rental.commission['drivy'] = commission - (commission/2 + nbDays) + deductibleToPay;
+
+  //pay the actors:
+  var actors = getActors(rentalId);
+
+  actors.payment[0].amount = rental.price; //Charge for the driver
+
+  //Amount received by the owner
+  if(rental.deductibleReduction == true)
+    actors.payment[1].amount = priceWithoutDeductible - commission;
+  else
+    actors.payment[1].amount = rental.price - commission;
+
+  //Amount received by the insurance
+  actors.payment[2].amount = rental.commission['insurance'];
+
+  //Amount received by the assistance
+  actors.payment[3].amount = rental.commission['assistance'];
+
+  //Amount received by drivy
+  actors.payment[4].amount = rental.commission['drivy'];
 }
 
 setPrice('1-pb-92');
