@@ -185,23 +185,34 @@ function getRental(rentalId){
   }
 }
 
-function setPrice(carId, rentalId){
-  var car = getCar(carId);
+function setPrice(rentalId){
   var rental = getRental(rentalId);
+  var car = getCar(rental.carId);
   var pricePerDay = car.pricePerDay;
   var pricePerKm = car.pricePerKm;
   var pickupDate = new Date(rental.pickupDate);
   var returnDate = new Date(rental.returnDate);
   var nbDays = 1 + ((returnDate - pickupDate)/(1000*3600*24));
   var priceForDistance = (rental.distance)*pricePerKm;
-  var priceForDuration = pricePerDay*nbDays;
-  var price = priceForDistance + priceForDuration;
-  rental.price = price;
+  var priceForDuration = 0;
+  var dayCount = 1;
+  while(dayCount <= nbDays){
+    if(dayCount == 1)
+      priceForDuration += pricePerDay;
+    else if(dayCount <= 4)
+      priceForDuration += pricePerDay - (pricePerDay*10/100);
+    else if(dayCount <= 10)
+      priceForDuration += pricePerDay - (pricePerDay*30/100);
+    else
+      priceForDuration += pricePerDay - (pricePerDay*50/100);
+    dayCount++;
+  }
+  rental.price = priceForDuration + priceForDistance;
 }
 
-setPrice('p306', '1-pb-92');
-setPrice('rr-sport', '2-rs-92');
-setPrice('p-boxster', '3-sa-92');
+setPrice('1-pb-92');
+setPrice('2-rs-92');
+setPrice('3-sa-92');
 
 console.log(cars);
 console.log(rentals);
