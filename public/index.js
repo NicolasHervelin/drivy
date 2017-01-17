@@ -165,6 +165,47 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
+function setModifications(rentalId){
+  var modif = getModif(rentalId);
+  var rental = getRental(rentalId);
+  var actors = getActors(rentalId);
+
+  var oldDistance = rental.distance;
+  var oldPickUpDate = new Date(rental.pickupDate);
+  var oldReturnDate = new Date(rental.returnDate);
+  var oldDriverAmount = actors.payment[0].amount;
+  var oldOwnerAmount = actors.payment[1].amount;
+  var oldInsuranceAmount = actors.payment[2].amount;
+  var oldAssistanceAmount = actors.payment[3].amount;
+  var oldDrivyAmount = actors.payment[4].amount;
+
+  var newDistance = oldDistance;
+  var newPickUpDate = oldPickUpDate;
+  var newReturnDate = oldReturnDate;
+
+  if(modif['pickupDate'] != null){
+    newPickUpDate = new Date(modif['pickupDate']);
+    rental.pickupDate = newPickUpDate;
+  }
+  if(modif['returnDate'] != null){
+    newReturnDate = new Date(modif['returnDate']);
+    rental.returnDate = newReturnDate;
+  }
+  if(modif['distance'] != null){
+    newDistance = modif['distance'];
+    rental.distance = newDistance;
+  }
+  setPrice(rental.id);
+}
+
+function getModif(rentalId){
+  var modifsLength = rentalModifications.length;
+  for(var i = 0; i < modifsLength; i++){
+    if(rentalModifications[i]['rentalId'] == rentalId){
+      return rentalModifications[i];
+    }
+  }
+}
 
 function getCar(carId){
   var carsLength = cars.length;
@@ -249,9 +290,21 @@ function setPrice(rentalId){
   actors.payment[4].amount = rental.commission['drivy'];
 }
 
-setPrice('1-pb-92');
-setPrice('2-rs-92');
-setPrice('3-sa-92');
+var rental1 = '1-pb-92';
+var rental2 = '2-rs-92';
+var rental3 = '3-sa-92';
+
+setPrice(rental1);
+setPrice(rental2);
+setPrice(rental3);
+
+console.log(cars);
+console.log(rentals);
+console.log(actors);
+console.log(rentalModifications);
+
+setModifications(rental1);
+setModifications(rental3);
 
 console.log(cars);
 console.log(rentals);
